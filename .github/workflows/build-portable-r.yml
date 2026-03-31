@@ -1,0 +1,169 @@
+name: Build Portable R for macOS
+
+on:
+  workflow_dispatch:
+    inputs:
+      r_version:
+        description: 'R version to build (e.g., 4.5.3)'
+        required: true
+        default: '4.5.3'
+  push:
+    tags:
+      - 'v*'
+
+# Serialize runs so dispatched builds complete in submission order
+concurrency:
+  group: build-release
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      matrix:
+        include:
+          - arch: arm64
+            runner: macos-26
+          - arch: x86_64
+            runner: macos-26-intel
+    outputs:
+      r_version: ${{ steps.version.outputs.r_version }}
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Determine R version
+        id: version
+        run: |
+          if [ -n "${{ github.event.inputs.r_version }}" ]; then
+            VERSION="${{ github.event.inputs.r_version }}"
+          else
+            VERSION="${{ github.ref_name }}"
+            VERSION="${VERSION#v}"
+          fi
+          echo "r_version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Building R $VERSION for ${{ matrix.arch }}"
+
+      - name: Import codesigning certificate
+        if: ${{ env.DEVELOPER_ID_P12 != '' }}
+        env:
+          DEVELOPER_ID_P12: ${{ secrets.DEVELOPER_ID_P12 }}
+          DEVELOPER_ID_P12_PASSWORD: ${{ secrets.DEVELOPER_ID_P12_PASSWORD }}
+        run: |
+          KEYCHAIN_PATH="$RUNNER_TEMP/build.keychain-db"
+          KEYCHAIN_PASSWORD="$(openssl rand -hex 16)"
+
+          # Create temporary keychain
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+
+          # Import certificate
+          P12_FILE="$RUNNER_TEMP/certificate.p12"
+          echo "$DEVELOPER_ID_P12" | base64 --decode > "$P12_FILE"
+          security import "$P12_FILE" \
+            -k "$KEYCHAIN_PATH" \
+            -P "$DEVELOPER_ID_P12_PASSWORD" \
+            -T /usr/bin/codesign \
+            -T /usr/bin/productsign
+          rm -f "$P12_FILE"
+
+          # Allow codesign to access keychain without UI prompt
+          security set-key-partition-list -S apple-tool:,apple:,codesign: \
+            -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+
+          # Add to search list (prepend so it's found first)
+          security list-keychains -d user -s "$KEYCHAIN_PATH" $(security list-keychains -d user | tr -d '"')
+
+          echo "CODESIGN_KEYCHAIN=$KEYCHAIN_PATH" >> $GITHUB_ENV
+
+      - name: Build and verify portable R
+        env:
+          CODESIGN_IDENTITY: ${{ secrets.DEVELOPER_ID_IDENTITY || '-' }}
+          NOTARIZE_APPLE_ID: ${{ secrets.NOTARIZE_APPLE_ID }}
+          NOTARIZE_PASSWORD: ${{ secrets.NOTARIZE_PASSWORD }}
+          NOTARIZE_TEAM_ID: ${{ secrets.NOTARIZE_TEAM_ID }}
+        run: make build VERSION=${{ steps.version.outputs.r_version }} ARCH=${{ matrix.arch }}
+
+      - name: Test portable R
+        run: make test VERSION=${{ steps.version.outputs.r_version }} ARCH=${{ matrix.arch }}
+
+      - name: Clean up keychain
+        if: always()
+        run: |
+          if [ -n "${CODESIGN_KEYCHAIN:-}" ]; then
+            security delete-keychain "$CODESIGN_KEYCHAIN" 2>/dev/null || true
+          fi
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: portable-r-${{ steps.version.outputs.r_version }}-macos-${{ matrix.arch }}
+          path: |
+            portable-r-*.tar.gz
+            portable-r-*.sha256
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download arm64 artifact
+        uses: actions/download-artifact@v8
+        with:
+          name: portable-r-${{ needs.build.outputs.r_version }}-macos-arm64
+          path: artifacts/
+
+      - name: Download x86_64 artifact
+        uses: actions/download-artifact@v8
+        with:
+          name: portable-r-${{ needs.build.outputs.r_version }}-macos-x86_64
+          path: artifacts/
+
+      - name: Generate release body
+        run: |
+          V="${{ needs.build.outputs.r_version }}"
+          ARM_SHA=$(cut -d' ' -f1 "artifacts/portable-r-${V}-macos-arm64.tar.gz.sha256" 2>/dev/null || echo "n/a")
+          X86_SHA=$(cut -d' ' -f1 "artifacts/portable-r-${V}-macos-x86_64.tar.gz.sha256" 2>/dev/null || echo "n/a")
+
+          cat > release-body.md << EOF
+          ## Portable R ${V} for macOS
+
+          Signed with a Developer ID Application certificate and notarized by Apple. These modified R binaries should not trigger Gatekeeper warnings.
+
+          ### Downloads
+          | Architecture | File | SHA256 |
+          |-------------|------|--------|
+          | Apple Silicon (arm64) | \`portable-r-${V}-macos-arm64.tar.gz\` | \`${ARM_SHA}\` |
+          | Intel (x86_64) | \`portable-r-${V}-macos-x86_64.tar.gz\` | \`${X86_SHA}\` |
+
+          ### Quick Install
+
+          **Apple Silicon (M1/M2/M3/M4)**
+          \`\`\`bash
+          curl -fSL https://github.com/portable-r/portable-r-macos/releases/download/v${V}/portable-r-${V}-macos-arm64.tar.gz | tar xz
+          \`\`\`
+
+          **Intel Mac**
+          \`\`\`bash
+          curl -fSL https://github.com/portable-r/portable-r-macos/releases/download/v${V}/portable-r-${V}-macos-x86_64.tar.gz | tar xz
+          \`\`\`
+
+          ### Usage
+          \`\`\`bash
+          ./portable-r-${V}-macos-*/bin/Rscript my_script.R
+          \`\`\`
+          No installation required. Packages install to the local \`library/\` directory.
+          EOF
+          # Remove leading whitespace from heredoc
+          sed -i 's/^          //' release-body.md
+
+      - name: Create or update release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ needs.build.outputs.r_version }}
+          name: R ${{ needs.build.outputs.r_version }}
+          files: artifacts/*
+          body_path: release-body.md
