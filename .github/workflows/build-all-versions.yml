@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       versions:
-        description: 'Comma-separated R versions (or "all" for 4.3.0-4.5.3)'
+        description: 'Comma-separated R versions, or "all" to read from versions.json'
         required: false
         default: 'all'
       dry_run:
@@ -18,11 +18,12 @@ jobs:
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
+      - uses: actions/checkout@v6
       - id: set-matrix
         run: |
           INPUT="${{ github.event.inputs.versions }}"
           if [ "$INPUT" = "all" ] || [ -z "$INPUT" ]; then
-            VERSIONS='["4.3.0","4.3.1","4.3.2","4.3.3","4.4.0","4.4.1","4.4.2","4.4.3","4.5.0","4.5.1","4.5.2","4.5.3"]'
+            VERSIONS=$(jq -c '.r.arm64 + .r.x86_64 | unique' versions.json)
           else
             # Convert comma-separated to JSON array
             VERSIONS=$(echo "$INPUT" | jq -R 'split(",") | map(gsub("\\s";""))')

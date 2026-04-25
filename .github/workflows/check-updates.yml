@@ -1,0 +1,79 @@
+# Daily cron to detect new R releases on CRAN macOS.
+#
+# When changes are found:
+#   1. Updates versions.json with new versions
+#   2. Regenerates README.md from GitHub releases
+#   3. Commits versions.json + README.md + LAST_CHECKED
+#   4. Triggers builds for any newly discovered R versions
+#
+# LAST_CHECKED is committed every run (even when nothing changed) so the
+# cron's liveness is auditable from the commit history.
+
+name: Check for Updates
+
+on:
+  schedule:
+    - cron: '0 8 * * *'   # 08:00 UTC daily
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Snapshot current versions
+        run: cp versions.json versions-before.json
+
+      - name: Check for new releases
+        id: check
+        run: bash check-updates.sh
+
+      - name: Regenerate README
+        if: steps.check.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: bash generate-readme.sh
+
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add LAST_CHECKED
+          if [ "${{ steps.check.outputs.changed }}" = "true" ]; then
+            git add versions.json README.md
+          fi
+          git diff --staged --quiet && exit 0
+          git commit -m "Check updates: $(date -u +%Y-%m-%d)"
+          git push
+
+      - name: Trigger builds for new R versions
+        if: steps.check.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # Lex-sort (not -V) for comm inputs: comm requires POSIX byte order.
+          # Version-sort and lex-sort agree for our current range but diverge
+          # at R 4.10.0; the final sort -uV below is safe (used for iteration
+          # order, not comm input).
+          BEFORE_ARM=$(jq -r '.r.arm64[]' versions-before.json | sort)
+          AFTER_ARM=$(jq -r '.r.arm64[]'  versions.json        | sort)
+          BEFORE_X86=$(jq -r '.r.x86_64[]' versions-before.json | sort)
+          AFTER_X86=$(jq -r '.r.x86_64[]'  versions.json        | sort)
+
+          NEW_ARM=$(comm -23 <(echo "$AFTER_ARM") <(echo "$BEFORE_ARM"))
+          NEW_X86=$(comm -23 <(echo "$AFTER_X86") <(echo "$BEFORE_X86"))
+          NEW_VERSIONS=$(echo -e "${NEW_ARM}\n${NEW_X86}" | sort -uV | grep -v '^$' || true)
+
+          for v in $NEW_VERSIONS; do
+            echo "Triggering build for new R $v..."
+            gh workflow run "Build Portable R for macOS" -f r_version="$v"
+            sleep 5
+          done
+
+          echo "Done"

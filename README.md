@@ -41,20 +41,26 @@ No system-wide changes. Packages install to the local `library/` directory insid
 
 ## Available Versions
 
+<!-- BEGIN RELEASES -->
+
 | R Version | arm64 (Apple Silicon) | x86_64 (Intel) |
 |-----------|----------------------|----------------|
-| 4.5.3 | [download](https://github.com/portable-r/portable-r-macos/releases/download/v4.5.3/portable-r-4.5.3-macos-arm64.tar.gz) | [download](https://github.com/portable-r/portable-r-macos/releases/download/v4.5.3/portable-r-4.5.3-macos-x86_64.tar.gz) |
-| 4.5.2 | [download](https://github.com/portable-r/portable-r-macos/releases/download/v4.5.2/portable-r-4.5.2-macos-arm64.tar.gz) | [download](https://github.com/portable-r/portable-r-macos/releases/download/v4.5.2/portable-r-4.5.2-macos-x86_64.tar.gz) |
-| 4.5.1 | [download](https://github.com/portable-r/portable-r-macos/releases/download/v4.5.1/portable-r-4.5.1-macos-arm64.tar.gz) | [download](https://github.com/portable-r/portable-r-macos/releases/download/v4.5.1/portable-r-4.5.1-macos-x86_64.tar.gz) |
-| 4.5.0 | [download](https://github.com/portable-r/portable-r-macos/releases/download/v4.5.0/portable-r-4.5.0-macos-arm64.tar.gz) | [download](https://github.com/portable-r/portable-r-macos/releases/download/v4.5.0/portable-r-4.5.0-macos-x86_64.tar.gz) |
-| 4.4.3 | [download](https://github.com/portable-r/portable-r-macos/releases/download/v4.4.3/portable-r-4.4.3-macos-arm64.tar.gz) | [download](https://github.com/portable-r/portable-r-macos/releases/download/v4.4.3/portable-r-4.4.3-macos-x86_64.tar.gz) |
-| 4.4.2 | [download](https://github.com/portable-r/portable-r-macos/releases/download/v4.4.2/portable-r-4.4.2-macos-arm64.tar.gz) | [download](https://github.com/portable-r/portable-r-macos/releases/download/v4.4.2/portable-r-4.4.2-macos-x86_64.tar.gz) |
-| 4.4.1 | [download](https://github.com/portable-r/portable-r-macos/releases/download/v4.4.1/portable-r-4.4.1-macos-arm64.tar.gz) | [download](https://github.com/portable-r/portable-r-macos/releases/download/v4.4.1/portable-r-4.4.1-macos-x86_64.tar.gz) |
-| 4.4.0 | [download](https://github.com/portable-r/portable-r-macos/releases/download/v4.4.0/portable-r-4.4.0-macos-arm64.tar.gz) | [download](https://github.com/portable-r/portable-r-macos/releases/download/v4.4.0/portable-r-4.4.0-macos-x86_64.tar.gz) |
-| 4.3.3 | [download](https://github.com/portable-r/portable-r-macos/releases/download/v4.3.3/portable-r-4.3.3-macos-arm64.tar.gz) | [download](https://github.com/portable-r/portable-r-macos/releases/download/v4.3.3/portable-r-4.3.3-macos-x86_64.tar.gz) |
-| 4.3.2 | [download](https://github.com/portable-r/portable-r-macos/releases/download/v4.3.2/portable-r-4.3.2-macos-arm64.tar.gz) | [download](https://github.com/portable-r/portable-r-macos/releases/download/v4.3.2/portable-r-4.3.2-macos-x86_64.tar.gz) |
-| 4.3.1 | [download](https://github.com/portable-r/portable-r-macos/releases/download/v4.3.1/portable-r-4.3.1-macos-arm64.tar.gz) | [download](https://github.com/portable-r/portable-r-macos/releases/download/v4.3.1/portable-r-4.3.1-macos-x86_64.tar.gz) |
-| 4.3.0 | [download](https://github.com/portable-r/portable-r-macos/releases/download/v4.3.0/portable-r-4.3.0-macos-arm64.tar.gz) | [download](https://github.com/portable-r/portable-r-macos/releases/download/v4.3.0/portable-r-4.3.0-macos-x86_64.tar.gz) |
+| 4.5.3 | [download](https://github.com/portable-r/portable-r-macos/releases/download/v4.5.3/portable-r-4.5.3-macos-arm64.tar.gz) (80 MB) | [download](https://github.com/portable-r/portable-r-macos/releases/download/v4.5.3/portable-r-4.5.3-macos-x86_64.tar.gz) (83 MB) |
+| 4.5.2 | [download](https://github.com/portable-r/portable-r-macos/releases/download/v4.5.2/portable-r-4.5.2-macos-arm64.tar.gz) (80 MB) | [download](https://github.com/portable-r/portable-r-macos/releases/download/v4.5.2/portable-r-4.5.2-macos-x86_64.tar.gz) (83 MB) |
+| 4.5.1 | [download](https://github.com/portable-r/portable-r-macos/releases/download/v4.5.1/portable-r-4.5.1-macos-arm64.tar.gz) (80 MB) | [download](https://github.com/portable-r/portable-r-macos/releases/download/v4.5.1/portable-r-4.5.1-macos-x86_64.tar.gz) (83 MB) |
+| 4.5.0 | [download](https://github.com/portable-r/portable-r-macos/releases/download/v4.5.0/portable-r-4.5.0-macos-arm64.tar.gz) (80 MB) | [download](https://github.com/portable-r/portable-r-macos/releases/download/v4.5.0/portable-r-4.5.0-macos-x86_64.tar.gz) (83 MB) |
+| 4.4.3 | [download](https://github.com/portable-r/portable-r-macos/releases/download/v4.4.3/portable-r-4.4.3-macos-arm64.tar.gz) (80 MB) | [download](https://github.com/portable-r/portable-r-macos/releases/download/v4.4.3/portable-r-4.4.3-macos-x86_64.tar.gz) (83 MB) |
+| 4.4.2 | [download](https://github.com/portable-r/portable-r-macos/releases/download/v4.4.2/portable-r-4.4.2-macos-arm64.tar.gz) (77 MB) | [download](https://github.com/portable-r/portable-r-macos/releases/download/v4.4.2/portable-r-4.4.2-macos-x86_64.tar.gz) (79 MB) |
+| 4.4.1 | [download](https://github.com/portable-r/portable-r-macos/releases/download/v4.4.1/portable-r-4.4.1-macos-arm64.tar.gz) (77 MB) | [download](https://github.com/portable-r/portable-r-macos/releases/download/v4.4.1/portable-r-4.4.1-macos-x86_64.tar.gz) (79 MB) |
+| 4.4.0 | [download](https://github.com/portable-r/portable-r-macos/releases/download/v4.4.0/portable-r-4.4.0-macos-arm64.tar.gz) (77 MB) | [download](https://github.com/portable-r/portable-r-macos/releases/download/v4.4.0/portable-r-4.4.0-macos-x86_64.tar.gz) (79 MB) |
+| 4.3.3 | [download](https://github.com/portable-r/portable-r-macos/releases/download/v4.3.3/portable-r-4.3.3-macos-arm64.tar.gz) (75 MB) | [download](https://github.com/portable-r/portable-r-macos/releases/download/v4.3.3/portable-r-4.3.3-macos-x86_64.tar.gz) (77 MB) |
+| 4.3.2 | [download](https://github.com/portable-r/portable-r-macos/releases/download/v4.3.2/portable-r-4.3.2-macos-arm64.tar.gz) (75 MB) | [download](https://github.com/portable-r/portable-r-macos/releases/download/v4.3.2/portable-r-4.3.2-macos-x86_64.tar.gz) (77 MB) |
+| 4.3.1 | [download](https://github.com/portable-r/portable-r-macos/releases/download/v4.3.1/portable-r-4.3.1-macos-arm64.tar.gz) (74 MB) | [download](https://github.com/portable-r/portable-r-macos/releases/download/v4.3.1/portable-r-4.3.1-macos-x86_64.tar.gz) (76 MB) |
+| 4.3.0 | [download](https://github.com/portable-r/portable-r-macos/releases/download/v4.3.0/portable-r-4.3.0-macos-arm64.tar.gz) (74 MB) | [download](https://github.com/portable-r/portable-r-macos/releases/download/v4.3.0/portable-r-4.3.0-macos-x86_64.tar.gz) (76 MB) |
+
+<sub>Last CRAN check: 2026-04-25 · Last release built: 2026-04-01</sub>
+
+<!-- END RELEASES -->
 
 ## URL Pattern
 
@@ -112,14 +118,19 @@ NOTARIZE_TEAM_ID="XXXXXXXXXX" \
 ./build.sh 4.5.3
 ```
 
+### Version management
+
+`versions.json` is the single source of truth for supported R versions and CRAN URLs. `check-updates.sh` scrapes CRAN daily to detect new releases and append them to `versions.json` (additive — never removes). `generate-readme.sh` updates the version table in this README from GitHub releases and syncs example version numbers in Quick Install / Usage prose. `LAST_CHECKED` records the most recent CRAN scrape and is committed every cron run so the cron's liveness is auditable.
+
 ### CI / GitHub Actions
 
-Two workflows are available, both triggered manually via `workflow_dispatch`:
+Three workflows are available:
 
-- **Build Portable R** (`build-portable-r.yml`): Builds a single R version for both arm64 and x86_64, runs the test suite, and creates a GitHub release. Runs are serialized so releases are created in order.
-- **Build All R Versions** (`build-all-versions.yml`): Builds all 12 supported versions (4.3.0 through 4.5.3) across both architectures, with a release job per version. Includes a dry-run option for testing.
+- **Build Portable R** (`build-portable-r.yml`): Builds a single R version for both arm64 and x86_64, runs the test suite, creates a GitHub release, then regenerates the README's download table from the published release. Runs are serialized so releases are created in order. Triggered manually via `workflow_dispatch`.
+- **Build All R Versions** (`build-all-versions.yml`): Builds every supported version (read from `versions.json`) across both architectures, with a release job per version. Includes a dry-run option for testing. Triggered manually via `workflow_dispatch`.
+- **Check for Updates** (`check-updates.yml`): Runs daily at 08:00 UTC. Scrapes CRAN for new R releases, updates `versions.json` and regenerates the README when changes are detected, then dispatches the build workflow for any newly discovered versions. Always commits a fresh `LAST_CHECKED` even when nothing changed.
 
-Releases are **not created automatically** on push. They must be triggered manually from the [Actions tab](../../actions). This is intentional since rebuilds should only happen when the build script changes or new R versions are added.
+Releases for non-detected versions are **not created automatically** on push. They must be triggered manually from the [Actions tab](../../actions). This is intentional since rebuilds should only happen when the build script changes or when CRAN ships a new R version.
 
 CI builds use repository secrets (`DEVELOPER_ID_P12`, `DEVELOPER_ID_IDENTITY`, `NOTARIZE_*`) for Developer ID signing and Apple notarization. Without these secrets, builds still succeed with ad-hoc signing.
 

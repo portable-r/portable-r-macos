@@ -3,7 +3,7 @@ SHELL := /bin/bash
 # ── Configuration ────────────────────────────────────────────────────────────
 
 ARCH    ?= $(shell uname -m)
-VERSIONS = 4.3.0 4.3.1 4.3.2 4.3.3 4.4.0 4.4.1 4.4.2 4.4.3 4.5.0 4.5.1 4.5.2 4.5.3
+VERSIONS = $(shell jq -r '.r.arm64 + .r.x86_64 | unique | .[]' versions.json | tr '\n' ' ')
 
 # Resolve CRAN arch name
 ifeq ($(ARCH),arm64)
@@ -23,6 +23,8 @@ endif
 help: ## Show this help
 	@echo ""
 	@echo "  Portable R for macOS — Build Targets"
+	@echo ""
+	@echo "  Requires: jq (brew install jq)"
 	@echo ""
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
 		awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-16s\033[0m %s\n", $$1, $$2}'
