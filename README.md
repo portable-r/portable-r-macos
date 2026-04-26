@@ -58,7 +58,7 @@ No system-wide changes. Packages install to the local `library/` directory insid
 | 4.3.1 | [download](https://github.com/portable-r/portable-r-macos/releases/download/v4.3.1/portable-r-4.3.1-macos-arm64.tar.gz) (74 MB) | [download](https://github.com/portable-r/portable-r-macos/releases/download/v4.3.1/portable-r-4.3.1-macos-x86_64.tar.gz) (76 MB) |
 | 4.3.0 | [download](https://github.com/portable-r/portable-r-macos/releases/download/v4.3.0/portable-r-4.3.0-macos-arm64.tar.gz) (74 MB) | [download](https://github.com/portable-r/portable-r-macos/releases/download/v4.3.0/portable-r-4.3.0-macos-x86_64.tar.gz) (76 MB) |
 
-<sub>Last CRAN check: 2026-04-25 · Last release built: 2026-04-01</sub>
+<sub>Last CRAN check: 2026-04-26 · Last release built: 2026-04-01</sub>
 
 <!-- END RELEASES -->
 
