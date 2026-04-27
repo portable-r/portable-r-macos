@@ -31,15 +31,28 @@ fetch() {
 
 check_arch() {
     local ARCH="$1"     # arm64 or x86_64
-    local SUBDIR="$2"   # big-sur-arm64 or big-sur-x86_64
 
     echo "-- R for macOS ($ARCH) --"
 
-    # 1. Per-arch directory listing
-    local DIR_VERSIONS
-    DIR_VERSIONS=$(fetch "https://cloud.r-project.org/bin/macosx/${SUBDIR}/base/" \
-        | grep -oE "R-[0-9]+\.[0-9]+\.[0-9]+-${ARCH}\.pkg" \
-        | sed -E "s/^R-//; s/-${ARCH}\.pkg$//" | sort -V | uniq)
+    # 1. Per-arch directory listings — iterate every CRAN baseline URL.
+    # CRAN occasionally moves new versions to a fresher OS baseline (e.g.,
+    # R 4.6.0 arm64 lives in sonoma-arm64/, while 4.3-4.5 stay in
+    # big-sur-arm64/). The urls list in versions.json enumerates all live
+    # baselines; we union the version sets across them.
+    local DIR_VERSIONS=""
+    local URLS
+    URLS=$(jq -r ".r.urls.${ARCH}[]" "$VERSIONS_FILE")
+    for url in $URLS; do
+        local subdir_versions
+        subdir_versions=$(fetch "${url}/" 2>/dev/null \
+            | grep -oE "R-[0-9]+\.[0-9]+\.[0-9]+-${ARCH}\.pkg" \
+            | sed -E "s/^R-//; s/-${ARCH}\.pkg$//" \
+            | sort -V | uniq || true)
+        if [ -n "$subdir_versions" ]; then
+            DIR_VERSIONS=$(printf '%s\n%s\n' "$DIR_VERSIONS" "$subdir_versions")
+        fi
+    done
+    DIR_VERSIONS=$(echo "$DIR_VERSIONS" | sort -V | uniq | grep -v '^$' || true)
 
     # 2. Landing page (announces "latest release")
     local LANDING_VERSIONS
@@ -92,9 +105,9 @@ check_arch() {
     done
 }
 
-check_arch "arm64"  "big-sur-arm64"
+check_arch "arm64"
 echo ""
-check_arch "x86_64" "big-sur-x86_64"
+check_arch "x86_64"
 
 # ── Always write LAST_CHECKED ───────────────────────────────────────────────
 

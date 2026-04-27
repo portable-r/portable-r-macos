@@ -76,15 +76,47 @@ ARCH="${2:-$(uname -m)}"
 SIGN_ID="${CODESIGN_IDENTITY:--}"
 
 case "$ARCH" in
-  arm64|aarch64) CRAN_ARCH="arm64";  CRAN_SUBDIR="big-sur-arm64";  PKG_SUFFIX="arm64"  ;;
-  x86_64)        CRAN_ARCH="x86_64"; CRAN_SUBDIR="big-sur-x86_64"; PKG_SUFFIX="x86_64" ;;
+  arm64|aarch64) CRAN_ARCH="arm64";  PKG_SUFFIX="arm64"  ;;
+  x86_64)        CRAN_ARCH="x86_64"; PKG_SUFFIX="x86_64" ;;
   *) err "Unsupported architecture: $ARCH"; exit 1 ;;
 esac
 
 OUTPUT_NAME="portable-r-${R_VERSION}-macos-${CRAN_ARCH}"
 OUTPUT_DIR="${OUTPUT_NAME}"
 PKG_FILE="R-${R_VERSION}-${PKG_SUFFIX}.pkg"
-DOWNLOAD_URL="https://cloud.r-project.org/bin/macosx/${CRAN_SUBDIR}/base/${PKG_FILE}"
+
+# Resolve the CRAN baseline directory for this version. CRAN occasionally
+# bumps the macOS baseline (e.g., R 4.6.0 arm64 moved to sonoma-arm64 from
+# big-sur-arm64). versions.json lists candidate URLs newest-first; we HEAD
+# each and use the first that has the .pkg.
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+VERSIONS_JSON="${SCRIPT_DIR}/versions.json"
+
+if ! command -v jq &>/dev/null; then
+  err "jq is required to resolve the CRAN download URL (brew install jq)"
+  exit 1
+fi
+if [ ! -f "$VERSIONS_JSON" ]; then
+  err "versions.json not found at $VERSIONS_JSON"
+  exit 1
+fi
+
+DOWNLOAD_URL=""
+for base_url in $(jq -r ".r.urls.${CRAN_ARCH}[]" "$VERSIONS_JSON"); do
+  candidate="${base_url}/${PKG_FILE}"
+  if curl -fsI --retry 2 --retry-delay 3 "$candidate" -o /dev/null 2>&1; then
+    DOWNLOAD_URL="$candidate"
+    break
+  fi
+done
+
+if [ -z "$DOWNLOAD_URL" ]; then
+  err "Could not find $PKG_FILE on any CRAN baseline; tried:"
+  for u in $(jq -r ".r.urls.${CRAN_ARCH}[]" "$VERSIONS_JSON"); do
+    err "  $u/$PKG_FILE"
+  done
+  exit 1
+fi
 
 echo ""
 echo -e "${BOLD}Portable R ${R_VERSION} for macOS (${CRAN_ARCH})${RESET}"

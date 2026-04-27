@@ -31,8 +31,13 @@
       "4.6.0"
     ],
     "urls": {
-      "arm64": "https://cloud.r-project.org/bin/macosx/big-sur-arm64/base",
-      "x86_64": "https://cloud.r-project.org/bin/macosx/big-sur-x86_64/base"
+      "arm64": [
+        "https://cloud.r-project.org/bin/macosx/sonoma-arm64/base",
+        "https://cloud.r-project.org/bin/macosx/big-sur-arm64/base"
+      ],
+      "x86_64": [
+        "https://cloud.r-project.org/bin/macosx/big-sur-x86_64/base"
+      ]
     }
   }
 }
