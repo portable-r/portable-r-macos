@@ -9,28 +9,28 @@ All binaries are signed with a Developer ID certificate and notarized by Apple, 
 **Apple Silicon (M1/M2/M3/M4)**
 
 ```bash
-curl -fSL https://github.com/portable-r/portable-r-macos/releases/download/v4.5.3/portable-r-4.5.3-macos-arm64.tar.gz | tar xz
+curl -fSL https://github.com/portable-r/portable-r-macos/releases/download/v4.6.0/portable-r-4.6.0-macos-arm64.tar.gz | tar xz
 ```
 
 **Intel Mac**
 
 ```bash
-curl -fSL https://github.com/portable-r/portable-r-macos/releases/download/v4.5.3/portable-r-4.5.3-macos-x86_64.tar.gz | tar xz
+curl -fSL https://github.com/portable-r/portable-r-macos/releases/download/v4.6.0/portable-r-4.6.0-macos-x86_64.tar.gz | tar xz
 ```
 
-Replace `4.5.3` with your desired version. See [all releases](https://github.com/portable-r/portable-r-macos/releases).
+Replace `4.6.0` with your desired version. See [all releases](https://github.com/portable-r/portable-r-macos/releases).
 
 ## Usage
 
 ```bash
 # Run an R script
-./portable-r-4.5.3-macos-arm64/bin/Rscript my_script.R
+./portable-r-4.6.0-macos-arm64/bin/Rscript my_script.R
 
 # Start interactive R
-./portable-r-4.5.3-macos-arm64/bin/R
+./portable-r-4.6.0-macos-arm64/bin/R
 
 # Install and use packages (works out of the box)
-./portable-r-4.5.3-macos-arm64/bin/Rscript -e '
+./portable-r-4.6.0-macos-arm64/bin/Rscript -e '
   install.packages("jsonlite")
   library(jsonlite)
   cat(toJSON(list(hello = "world"), auto_unbox = TRUE))
@@ -45,6 +45,7 @@ No system-wide changes. Packages install to the local `library/` directory insid
 
 | R Version | arm64 (Apple Silicon) | x86_64 (Intel) |
 |-----------|----------------------|----------------|
+| 4.6.0 | [download](https://github.com/portable-r/portable-r-macos/releases/download/v4.6.0/portable-r-4.6.0-macos-arm64.tar.gz) (83 MB) | [download](https://github.com/portable-r/portable-r-macos/releases/download/v4.6.0/portable-r-4.6.0-macos-x86_64.tar.gz) (86 MB) |
 | 4.5.3 | [download](https://github.com/portable-r/portable-r-macos/releases/download/v4.5.3/portable-r-4.5.3-macos-arm64.tar.gz) (80 MB) | [download](https://github.com/portable-r/portable-r-macos/releases/download/v4.5.3/portable-r-4.5.3-macos-x86_64.tar.gz) (83 MB) |
 | 4.5.2 | [download](https://github.com/portable-r/portable-r-macos/releases/download/v4.5.2/portable-r-4.5.2-macos-arm64.tar.gz) (80 MB) | [download](https://github.com/portable-r/portable-r-macos/releases/download/v4.5.2/portable-r-4.5.2-macos-x86_64.tar.gz) (83 MB) |
 | 4.5.1 | [download](https://github.com/portable-r/portable-r-macos/releases/download/v4.5.1/portable-r-4.5.1-macos-arm64.tar.gz) (80 MB) | [download](https://github.com/portable-r/portable-r-macos/releases/download/v4.5.1/portable-r-4.5.1-macos-x86_64.tar.gz) (83 MB) |
@@ -58,7 +59,7 @@ No system-wide changes. Packages install to the local `library/` directory insid
 | 4.3.1 | [download](https://github.com/portable-r/portable-r-macos/releases/download/v4.3.1/portable-r-4.3.1-macos-arm64.tar.gz) (74 MB) | [download](https://github.com/portable-r/portable-r-macos/releases/download/v4.3.1/portable-r-4.3.1-macos-x86_64.tar.gz) (76 MB) |
 | 4.3.0 | [download](https://github.com/portable-r/portable-r-macos/releases/download/v4.3.0/portable-r-4.3.0-macos-arm64.tar.gz) (74 MB) | [download](https://github.com/portable-r/portable-r-macos/releases/download/v4.3.0/portable-r-4.3.0-macos-x86_64.tar.gz) (76 MB) |
 
-<sub>Last CRAN check: 2026-04-27 · Last release built: 2026-04-01</sub>
+<sub>Last CRAN check: 2026-04-27 · Last release built: 2026-04-27</sub>
 
 <!-- END RELEASES -->
 
@@ -91,19 +92,19 @@ For full technical details, see [build-details.md](build-details.md).
 `build.sh` downloads a CRAN `.pkg`, extracts it, patches all dylib paths and scripts, codesigns, and packages the result as a `.tar.gz`. It auto-detects the current architecture and falls back to ad-hoc signing when no identity is provided.
 
 ```bash
-./build.sh 4.5.3                   # Build for current architecture
-./build.sh 4.5.3 arm64             # Build for Apple Silicon
+./build.sh 4.6.0                   # Build for current architecture
+./build.sh 4.6.0 arm64             # Build for Apple Silicon
 ./build.sh --help                  # All options (signing, notarization)
 ```
 
 A `Makefile` wraps common workflows. `make test` runs a test suite with 48 checks covering directory structure, dylib portability, codesigning, execution, package installation, and more.
 
 ```bash
-make build VERSION=4.5.3           # Build one version
-make test VERSION=4.5.3            # Run test suite
+make build VERSION=4.6.0           # Build one version
+make test VERSION=4.6.0            # Run test suite
 make build-all                     # Build all 12 versions
 make list                          # Show versions and build status
-make clean VERSION=4.5.3           # Remove build artifacts
+make clean VERSION=4.6.0           # Remove build artifacts
 ```
 
 ### Codesigning
@@ -115,7 +116,7 @@ CODESIGN_IDENTITY="Developer ID Application: ..." \
 NOTARIZE_APPLE_ID="you@example.com" \
 NOTARIZE_PASSWORD="xxxx-xxxx-xxxx-xxxx" \
 NOTARIZE_TEAM_ID="XXXXXXXXXX" \
-./build.sh 4.5.3
+./build.sh 4.6.0
 ```
 
 ### Version management
