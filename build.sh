@@ -420,12 +420,20 @@ FIXSCRIPT
 chmod +x "$OUTPUT_DIR/bin/fix-dylibs"
 ok "bin/fix-dylibs: standalone .so patcher (for manual use)"
 
-# bin/Rscript — wrapper that sets RHOME before launching the real binary
+# bin/Rscript — wrapper that sets RHOME before launching the real binary.
+# R <= 4.5 derived R_SHARE_DIR / R_INCLUDE_DIR / R_DOC_DIR from R_HOME at
+# startup if unset, but R 4.6.0 falls back to the compile-time default
+# (/Library/Frameworks/R.framework/Resources/...) which is wrong for a
+# portable build. Set them explicitly so the wrapper works on every
+# supported R version.
 cat > "$OUTPUT_DIR/bin/Rscript" << 'WRAPPER'
 #!/bin/bash
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 export RHOME="$(cd "$SCRIPT_DIR/.." && pwd)"
 export R_HOME="$RHOME"
+export R_SHARE_DIR="${R_HOME}/share"
+export R_INCLUDE_DIR="${R_HOME}/include"
+export R_DOC_DIR="${R_HOME}/doc"
 exec "$SCRIPT_DIR/Rscript.bin" "$@"
 WRAPPER
 chmod +x "$OUTPUT_DIR/bin/Rscript"
