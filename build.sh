@@ -341,9 +341,13 @@ fi
 
 step "Patching scripts and config for portability"
 
-# Detect the exact hardcoded path from bin/R before we modify it
+# Detect the exact hardcoded path from bin/R before we modify it. R 4.5.x
+# wrote `R_HOME_DIR=/Library/...`; R 4.6.0 switched to `R_HOME_DIR="/Library/..."`.
+# Strip surrounding double-quotes so the substring substitution below
+# matches paths inside other quoted assignments (R_SHARE_DIR, R_INCLUDE_DIR,
+# R_DOC_DIR), not just the bare R_HOME_DIR line.
 R_SCRIPT="$OUTPUT_DIR/bin/R"
-HARDCODED_PATH=$(grep "^R_HOME_DIR=" "$R_SCRIPT" | sed 's/^R_HOME_DIR=//')
+HARDCODED_PATH=$(grep "^R_HOME_DIR=" "$R_SCRIPT" | sed 's/^R_HOME_DIR=//' | tr -d '"')
 
 # bin/R — make R_HOME_DIR self-relative, replace all other occurrences
 sed -i '' 's|^R_HOME_DIR=.*|R_HOME_DIR="$(cd "$(dirname "$0")/.." \&\& pwd)"|' "$R_SCRIPT"
