@@ -60,7 +60,7 @@ No system-wide changes. Packages install to the local `library/` directory insid
 | 4.3.1 | [download](https://github.com/portable-r/portable-r-macos/releases/download/v4.3.1/portable-r-4.3.1-macos-arm64.tar.gz) (74 MB) | [download](https://github.com/portable-r/portable-r-macos/releases/download/v4.3.1/portable-r-4.3.1-macos-x86_64.tar.gz) (76 MB) |
 | 4.3.0 | [download](https://github.com/portable-r/portable-r-macos/releases/download/v4.3.0/portable-r-4.3.0-macos-arm64.tar.gz) (74 MB) | [download](https://github.com/portable-r/portable-r-macos/releases/download/v4.3.0/portable-r-4.3.0-macos-x86_64.tar.gz) (76 MB) |
 
-<sub>Last CRAN check: 2026-06-26 · Last release built: 2026-06-26</sub>
+<sub>Last CRAN check: 2026-09-23 · Last release built: 2026-06-26 (R 4.6.1)</sub>
 
 <!-- END RELEASES -->
 
@@ -122,7 +122,7 @@ NOTARIZE_TEAM_ID="XXXXXXXXXX" \
 
 ### Version management
 
-`versions.json` is the single source of truth for supported R versions and CRAN URLs. `check-updates.sh` scrapes CRAN daily to detect new releases and append them to `versions.json` (additive — never removes). `generate-readme.sh` updates the version table in this README from GitHub releases and syncs example version numbers in Quick Install / Usage prose. `LAST_CHECKED` records the most recent CRAN scrape and is committed every cron run so the cron's liveness is auditable.
+`versions.json` is the single source of truth for supported R versions and CRAN URLs. `check-updates.sh` scrapes CRAN daily to detect new releases and append them to `versions.json` (additive — never removes). `generate-readme.sh` updates the version table in this README from GitHub releases and syncs example version numbers in Quick Install / Usage prose. `LAST_CHECKED` records the most recent CRAN scrape and is committed every cron run so the cron's liveness is auditable. The line under the download table shows that date and the date of the last release build, and is refreshed with every successful check.
 
 ### CI / GitHub Actions
 
@@ -130,7 +130,7 @@ Three workflows are available:
 
 - **Build Portable R** (`build-portable-r.yml`): Builds a single R version for both arm64 and x86_64, runs the test suite, creates a GitHub release, then regenerates the README's download table from the published release. Runs are serialized so releases are created in order. Triggered manually via `workflow_dispatch`.
 - **Build All R Versions** (`build-all-versions.yml`): Builds every supported version (read from `versions.json`) across both architectures, with a release job per version. Includes a dry-run option for testing. Triggered manually via `workflow_dispatch`.
-- **Check for Updates** (`check-updates.yml`): Runs daily at 08:00 UTC. Scrapes CRAN for new R releases, updates `versions.json` and regenerates the README when changes are detected, then dispatches the build workflow for any newly discovered versions. Always commits a fresh `LAST_CHECKED` even when nothing changed.
+- **Check for Updates** (`check-updates.yml`): Runs daily at 08:00 UTC. Scrapes CRAN for new R releases, updates `versions.json` when changes are detected, regenerates the README, then dispatches the build workflow for any newly discovered versions. Every successful check commits a fresh `LAST_CHECKED` and README, even when nothing changed.
 
 Releases for non-detected versions are **not created automatically** on push. They must be triggered manually from the [Actions tab](../../actions). This is intentional since rebuilds should only happen when the build script changes or when CRAN ships a new R version.
 
