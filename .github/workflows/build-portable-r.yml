@@ -11,10 +11,12 @@ on:
     tags:
       - 'v*'
 
-# Serialize runs so dispatched builds complete in submission order
+# Serialize runs so dispatched builds complete in submission order, keeping
+# every pending run (the default keeps one and cancels the rest)
 concurrency:
   group: build-release
   cancel-in-progress: false
+  queue: max
 
 jobs:
   build:
