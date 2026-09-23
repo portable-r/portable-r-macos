@@ -32,7 +32,7 @@ jobs:
       r_version: ${{ steps.version.outputs.r_version }}
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Determine R version
         id: version
@@ -163,7 +163,7 @@ jobs:
           sed -i 's/^          //' release-body.md
 
       - name: Create or update release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: v${{ needs.build.outputs.r_version }}
           name: R ${{ needs.build.outputs.r_version }}
@@ -183,7 +183,7 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           ref: main
 
