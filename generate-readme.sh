@@ -26,13 +26,14 @@ echo "==> Querying releases from $REPO"
 
 # ── Fetch releases ───────────────────────────────────────────────────────────
 
+# Drafts are skipped (a failed release job can leave one); pages are merged
+# into one array
 RELEASES_JSON=$(gh api "repos/${REPO}/releases" --paginate --jq '
-  [.[] | {
+  [.[] | select(.draft | not) | {
     tag: .tag_name,
-    published_at: .published_at,
-    assets: [.assets[] | {name: .name, size: .size}]
+    assets: [.assets[] | {name: .name, size: .size, created_at: .created_at}]
   }]
-')
+' | jq -c -s 'add // []')
 
 # ── Compute latest version + last-built date ─────────────────────────────────
 
@@ -44,12 +45,13 @@ R_VERSIONS=$(echo "$RELEASES_JSON" | jq -r '
 
 LATEST=$(echo "$R_VERSIONS" | head -n1)
 
+# Newest asset upload across all releases, so a rebuild that re-uploads an
+# existing release's archives counts too, e.g. "2026-09-23 (R 4.6.1)"
 LAST_BUILT=$(echo "$RELEASES_JSON" | jq -r '
-  [.[].published_at | select(. != null)] | max // "never"
-')
-if [ "$LAST_BUILT" != "never" ]; then
-    LAST_BUILT="${LAST_BUILT%%T*}"  # YYYY-MM-DD
-fi
+  [.[] | .tag as $tag | .assets[] | {tag: $tag, at: .created_at}] | max_by(.at)
+  | if . == null then "never"
+    else "\(.at[0:10]) (\(.tag | if startswith("v") then "R " + ltrimstr("v") else . end))"
+    end')
 
 # ── Read last-checked from LAST_CHECKED ──────────────────────────────────────
 

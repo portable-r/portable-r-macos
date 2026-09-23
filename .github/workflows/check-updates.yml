@@ -1,13 +1,14 @@
 # Daily cron to detect new R releases on CRAN macOS.
 #
-# When changes are found:
+# Every successful check:
 #   1. Updates versions.json with new versions
-#   2. Regenerates README.md from GitHub releases
-#   3. Commits versions.json + README.md + LAST_CHECKED
+#   2. Regenerates README.md from GitHub releases, including the "Last CRAN
+#      check / Last release built" line under the download table
+#   3. Commits LAST_CHECKED + README.md (+ versions.json when it changed)
 #   4. Triggers builds for any newly discovered R versions
 #
-# LAST_CHECKED is committed every run (even when nothing changed) so the
-# cron's liveness is auditable from the commit history.
+# The daily commit makes the cron's liveness auditable from the commit
+# history and keeps the README's check date current.
 
 name: Check for Updates
 
@@ -15,6 +16,13 @@ on:
   schedule:
     - cron: '0 8 * * *'   # 08:00 UTC daily
   workflow_dispatch:
+
+# One run at a time. (A stale run, e.g. a re-run of a day that already
+# committed, fails at Commit on the LAST_CHECKED conflict rather than
+# dispatching builds twice.)
+concurrency:
+  group: check-updates
+  cancel-in-progress: false
 
 permissions:
   contents: write
@@ -33,24 +41,54 @@ jobs:
         id: check
         run: bash check-updates.sh
 
+      # Refresh the README every run so the "Last CRAN check" date under the
+      # table stays current. A failure here only leaves the README as it was;
+      # LAST_CHECKED is still committed below.
       - name: Regenerate README
-        if: steps.check.outputs.changed == 'true'
+        continue-on-error: true
         env:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
         run: bash generate-readme.sh
 
+      # Always commit LAST_CHECKED and README.md; include versions.json when
+      # it changed. If a build's README update pushed to main meanwhile,
+      # rebase onto it; README.md is fully generated, so a conflict there is
+      # resolved by regenerating it. Any other conflict stops the step.
       - name: Commit
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add LAST_CHECKED
+          git add LAST_CHECKED README.md
           if [ "${{ steps.check.outputs.changed }}" = "true" ]; then
-            git add versions.json README.md
+            git add versions.json
           fi
           git diff --staged --quiet && exit 0
           git commit -m "Check updates: $(date -u +%Y-%m-%d)"
-          git push
+          for i in 1 2 3; do
+            git push && exit 0
+            echo "Push rejected, rebasing ($i/3)..."
+            if ! git pull --rebase origin main; then
+              if [ "$(git diff --name-only --diff-filter=U)" != "README.md" ]; then
+                git rebase --abort || true
+                echo "Rebase failed with conflicts outside README.md" >&2
+                exit 1
+              fi
+              git checkout --ours README.md  # the upstream copy (rebase: ours = main)
+              bash generate-readme.sh || true
+              git add README.md
+              GIT_EDITOR=true git rebase --continue
+            fi
+            if bash generate-readme.sh && ! git diff --quiet README.md; then
+              git add README.md
+              git commit --amend --no-edit
+            fi
+          done
+          echo "Failed to push after 3 attempts" >&2
+          exit 1
 
       - name: Trigger builds for new R versions
         if: steps.check.outputs.changed == 'true'
