@@ -18,7 +18,7 @@ jobs:
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - id: set-matrix
         run: |
           INPUT="${{ github.event.inputs.versions }}"
@@ -46,7 +46,7 @@ jobs:
             runner: macos-26-intel
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Import codesigning certificate
         if: ${{ env.DEVELOPER_ID_P12 != '' }}
@@ -169,7 +169,7 @@ jobs:
           sed -i 's/^          //' release-body.md
 
       - name: Create or update release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: v${{ matrix.r_version }}
           name: R ${{ matrix.r_version }}
